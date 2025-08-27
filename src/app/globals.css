@@ -1,0 +1,29 @@
+/*
+// FILE: src/app/globals.css
+// PURPOSE: Updated styles for better legibility and a new font.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light mode by default for better legibility */
+  --background: #f0f2f5; /* A soft, light grey background */
+  --foreground: #1c1e21; /* A dark, almost-black for text */
+}
+
+@media (prefers-color-scheme: dark) {
+  /* You can define a separate dark theme here if you wish */
+  :root {
+    --background: #1c1e21;
+    --foreground: #f0f2f5;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* THE FONT CHANGE IS HERE */
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+}
