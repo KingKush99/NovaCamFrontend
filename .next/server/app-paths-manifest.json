@@ -1,4 +1,5 @@
 {
-  "/cams/page": "app/cams/page.js",
-  "/cams/room/[username]/page": "app/cams/room/[username]/page.js"
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/cams/room/[username]/page": "app/cams/room/[username]/page.js",
+  "/cams/page": "app/cams/page.js"
 }
