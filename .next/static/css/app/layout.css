@@ -944,6 +944,9 @@ video {
 .h-px {
   height: 1px;
 }
+.h-\[calc\(100vh-120px\)\] {
+  height: calc(100vh - 120px);
+}
 .max-h-48 {
   max-height: 12rem;
 }
@@ -1324,6 +1327,9 @@ video {
 }
 .border-4 {
   border-width: 4px;
+}
+.border-0 {
+  border-width: 0px;
 }
 .border-x {
   border-left-width: 1px;
