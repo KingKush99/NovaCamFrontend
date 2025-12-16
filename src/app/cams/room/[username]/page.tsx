@@ -2,50 +2,38 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaHeart, FaShare, FaUser, FaPlay } from 'react-icons/fa';
-import { useState } from 'react';
+import { FaArrowLeft, FaHeart, FaShare, FaUser, FaPlay, FaExternalLinkAlt } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
 
-// Featured models pool for suggestions
-const MODEL_POOL = [
-    'soficb', 'angell6969', 'angelblisss', 'miihoflex', 'monika_reed1', 'malenahot525',
-    'ana_maria11', 'krisskissshow', 'caramelangels', 'princess_sweety', 'livvywinters',
-    'boobss', 'vika54784', 'lunarspark', 'heyskylar', 'adriana_elvis', 'blissdilley',
-    'annieguzman', 'amy_queen7', 'swt_shadow', '1m_valery', 'crimsonkitten',
-    'sosabless', 'anna_monik', 'sabrinajadex', 'melissalem1', 'sabrina_geek',
-    'pinkncrazy', '2strangers', 'blessme_g', 'kuro_ren', 'miss_giulia',
-    'ami_katana', 'mirela_silver', 'freyabyrne', 'devyale', 'yourlittlesunrise'
-];
+// Affiliate codes
+const TOUR = 'LQps';
+const CAMPAIGN = 'QvtQPh';
 
-function SuggestionCard({ username }: { username: string }) {
-    const [imgError, setImgError] = useState(false);
-    const thumbnailUrl = `https://roomimg.stream.highwebmedia.com/ri/${username}.jpg`;
-
+function SuggestionCard({ username, index }: { username: string; index: number }) {
     return (
         <Link
             href={`/cams/room/${username}`}
-            className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 group hover:border-fuchsia-500 transition-all"
+            className="relative aspect-video rounded-lg overflow-hidden border border-zinc-800 group hover:border-fuchsia-500 transition-all hover:scale-[1.02]"
+            style={{
+                background: `linear-gradient(135deg, hsl(${(index * 47) % 360}, 70%, 20%), hsl(${(index * 47 + 60) % 360}, 70%, 10%))`
+            }}
         >
-            {!imgError ? (
-                <img
-                    src={thumbnailUrl}
-                    alt={username}
-                    className="w-full h-full object-cover"
-                    onError={() => setImgError(true)}
-                />
-            ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-800">
-                    <FaUser className="text-3xl text-zinc-600" />
-                </div>
-            )}
+            {/* User icon placeholder */}
+            <div className="absolute inset-0 flex items-center justify-center">
+                <FaUser className="text-2xl text-white/20" />
+            </div>
 
             {/* Play overlay */}
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <FaPlay className="text-white text-2xl" />
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <FaPlay className="text-white text-xl" />
             </div>
 
             {/* Username */}
             <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/90 to-transparent">
-                <span className="text-white text-xs font-bold truncate block">{username}</span>
+                <div className="flex items-center justify-between">
+                    <span className="text-white text-xs font-bold truncate">{username}</span>
+                    <span className="bg-red-600 text-white text-[8px] font-bold px-1 py-0.5 rounded">LIVE</span>
+                </div>
             </div>
         </Link>
     );
@@ -55,12 +43,34 @@ export default function ChaturbateRoomPage() {
     const params = useParams();
     const router = useRouter();
     const username = params.username as string;
+    const [suggestions, setSuggestions] = useState<string[]>([]);
 
     // Official Chaturbate embed URL
     const embedUrl = `https://chaturbate.com/embed/${username}/?bgcolor=black`;
 
-    // Get suggestions (exclude current model)
-    const suggestions = MODEL_POOL.filter(m => m !== username).slice(0, 12);
+    // External link for direct Chaturbate access (with affiliate)
+    const externalUrl = `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=room&room=${username}`;
+
+    // Fetch suggestions from API
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            try {
+                const res = await fetch('/api/performers?gender=f&limit=12');
+                const data = await res.json();
+                if (data.performers) {
+                    setSuggestions(
+                        data.performers
+                            .map((p: any) => p.username)
+                            .filter((u: string) => u !== username)
+                            .slice(0, 12)
+                    );
+                }
+            } catch (e) {
+                console.error('Failed to fetch suggestions');
+            }
+        };
+        fetchSuggestions();
+    }, [username]);
 
     return (
         <div className="min-h-screen bg-black">
@@ -86,9 +96,15 @@ export default function ChaturbateRoomPage() {
                         <button className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-colors">
                             <FaHeart /> Follow
                         </button>
-                        <button className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-full transition-colors">
-                            <FaShare />
-                        </button>
+                        <a
+                            href={externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-full transition-colors"
+                            title="Open on Chaturbate"
+                        >
+                            <FaExternalLinkAlt />
+                        </a>
                     </div>
                 </div>
             </div>
@@ -107,16 +123,18 @@ export default function ChaturbateRoomPage() {
                 </div>
 
                 {/* Suggestions Section */}
-                <div className="mb-8">
-                    <h2 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                        <span className="text-fuchsia-500">●</span> More Like This
-                    </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                        {suggestions.map(model => (
-                            <SuggestionCard key={model} username={model} />
-                        ))}
+                {suggestions.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                            <span className="text-fuchsia-500">●</span> More Like This
+                        </h2>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                            {suggestions.map((model, i) => (
+                                <SuggestionCard key={model} username={model} index={i} />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Back to Browse */}
                 <div className="text-center">

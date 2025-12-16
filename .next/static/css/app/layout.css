@@ -1651,6 +1651,9 @@ video {
 .bg-zinc-950\/50 {
   background-color: rgb(9 9 11 / 0.5);
 }
+.bg-black\/30 {
+  background-color: rgb(0 0 0 / 0.3);
+}
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
 }
@@ -2000,6 +2003,9 @@ video {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
+}
+.text-\[8px\] {
+  font-size: 8px;
 }
 .font-black {
   font-weight: 900;

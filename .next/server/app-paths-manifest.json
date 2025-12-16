@@ -1,3 +1,4 @@
 {
+  "/api/performers/route": "app/api/performers/route.js",
   "/cams/page": "app/cams/page.js"
 }
