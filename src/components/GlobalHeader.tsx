@@ -22,7 +22,7 @@ export default function GlobalHeader() {
   const [showAdsModal, setShowAdsModal] = useState(false);
 
   // Music Store
-  const { playlist, currentTrackIndex, isPlaying, volume, isMuted, playTrack, togglePlay, playNext, playPrev, addTrack, removeTrack, setVolume, toggleMute } = useMusicStore();
+  const { playlist, currentTrackIndex, isPlaying, volume, isMuted, activePlaylist, playTrack, togglePlay, playNext, playPrev, addTrack, removeTrack, setVolume, toggleMute, loadPresetPlaylist, setActivePlaylist } = useMusicStore();
   const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
@@ -208,10 +208,32 @@ export default function GlobalHeader() {
                     <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                       <FaMusic /> Music Player
                     </h3>
-                    <button onClick={() => fileInputRef.current?.click()} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded border border-zinc-700">
-                      <FaPlus /> Add
+                    <button onClick={() => fileInputRef.current?.click()} className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded border border-zinc-700 flex items-center gap-1">
+                      <FaPlus /> Upload
                     </button>
                     <input type="file" accept="audio/*" multiple ref={fileInputRef} className="hidden" onChange={(e) => e.target.files && Array.from(e.target.files).forEach(addTrack)} />
+                  </div>
+
+                  {/* Playlist Tabs */}
+                  <div className="flex gap-1 mb-3 px-2">
+                    <button
+                      onClick={() => loadPresetPlaylist('instrumental')}
+                      className={`flex-1 text-[10px] py-1.5 rounded font-bold ${activePlaylist === 'instrumental' ? 'bg-cyan-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
+                    >
+                      🎹 Instrumental
+                    </button>
+                    <button
+                      onClick={() => loadPresetPlaylist('lyrics')}
+                      className={`flex-1 text-[10px] py-1.5 rounded font-bold ${activePlaylist === 'lyrics' ? 'bg-fuchsia-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
+                    >
+                      🎤 Lyrics
+                    </button>
+                    <button
+                      onClick={() => setActivePlaylist('user')}
+                      className={`flex-1 text-[10px] py-1.5 rounded font-bold ${activePlaylist === 'user' ? 'bg-green-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
+                    >
+                      📁 My Music
+                    </button>
                   </div>
 
                   {/* Current Track (Spotify-ish Player) */}
@@ -230,7 +252,9 @@ export default function GlobalHeader() {
                       <div className="text-sm font-bold text-white truncate">
                         {currentTrackIndex >= 0 ? playlist[currentTrackIndex]?.name : "No Track Selected"}
                       </div>
-                      <div className="text-xs text-zinc-500">Artist Name</div>
+                      <div className="text-xs text-zinc-500">
+                        {currentTrackIndex >= 0 ? playlist[currentTrackIndex]?.artist || 'Unknown Artist' : 'Select a track'}
+                      </div>
                     </div>
 
                     {/* Progress (Fake) */}
@@ -254,22 +278,32 @@ export default function GlobalHeader() {
 
                   {/* Playlist */}
                   <div className="space-y-1 max-h-48 overflow-y-auto px-1 custom-scrollbar">
-                    {playlist.map((track, i) => (
-                      <div key={track.id} onClick={() => playTrack(i)} className={clsx("flex items-center gap-3 p-2 rounded-lg cursor-pointer group hover:bg-zinc-800/50", i === currentTrackIndex ? "bg-zinc-800" : "")}>
-                        <div className="w-8 h-8 bg-zinc-900 rounded flex items-center justify-center text-zinc-600 text-xs">
-                          {i + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={clsx("text-xs font-bold truncate", i === currentTrackIndex ? "text-green-500" : "text-white")}>{track.name}</div>
-                          <div className="text-[10px] text-zinc-500">Local File</div>
-                        </div>
-                        <button onClick={(e) => { e.stopPropagation(); removeTrack(track.id); }} className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-500">
-                          <FaTrash />
-                        </button>
+                    {playlist.length === 0 ? (
+                      <div className="text-center py-4 text-zinc-500 text-xs">
+                        <p>No tracks yet!</p>
+                        <p className="mt-1">Click a playlist tab or upload music</p>
                       </div>
-                    ))}
+                    ) : (
+                      playlist.map((track, i) => (
+                        <div key={track.id} onClick={() => playTrack(i)} className={clsx("flex items-center gap-3 p-2 rounded-lg cursor-pointer group hover:bg-zinc-800/50", i === currentTrackIndex ? "bg-zinc-800" : "")}>
+                          <div className="w-8 h-8 bg-zinc-900 rounded flex items-center justify-center text-zinc-600 text-xs">
+                            {i + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={clsx("text-xs font-bold truncate", i === currentTrackIndex ? "text-green-500" : "text-white")}>{track.name}</div>
+                            <div className="text-[10px] text-zinc-500">{track.artist || 'Unknown'}</div>
+                          </div>
+                          {!track.isPreset && (
+                            <button onClick={(e) => { e.stopPropagation(); removeTrack(track.id); }} className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-500">
+                              <FaTrash />
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
+
 
               </div>
             )}

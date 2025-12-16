@@ -941,6 +941,9 @@ video {
 .h-px {
   height: 1px;
 }
+.h-20 {
+  height: 5rem;
+}
 .max-h-48 {
   max-height: 12rem;
 }
@@ -1656,6 +1659,10 @@ video {
 }
 .bg-fuchsia-600\/30 {
   background-color: rgb(192 38 211 / 0.3);
+}
+.bg-cyan-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(8 145 178 / var(--tw-bg-opacity));
 }
 .bg-gradient-to-br {
   background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
