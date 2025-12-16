@@ -8,6 +8,7 @@ import CheckoutModal from '@/components/CheckoutModal';
 import { FaShoppingCart, FaSearch, FaStar, FaCheck, FaGem, FaCrown, FaTrophy, FaPlus, FaCreditCard } from 'react-icons/fa';
 import { SUBSCRIPTION_TIERS } from '@/data/subscriptions';
 import { mockProducts, Product } from '@/data/products'; // Shared data
+import { lovenseProducts } from '@/data/lovenseProducts'; // Affiliate data
 import { useCartStore } from '@/store/useCartStore';     // Global Cart
 
 export default function ShopPage() {
@@ -19,18 +20,32 @@ export default function ShopPage() {
     // Global Cart
     const { cart, addToCart } = useCartStore();
 
-    const categories = ['All', 'Tokens', 'Customization', 'Merch'];
+    const categories = ['All', 'Tokens', 'Customization', 'Toys', 'Merch'];
 
-    const filteredProducts = mockProducts.filter(product => {
+    // Combine products for display
+    const allProducts = [
+        ...mockProducts,
+        ...lovenseProducts.map(p => ({
+            ...p,
+            image: '', // Use placeholder or icon in render
+            isExternal: true // Flag for external link
+        }))
+    ];
+
+    const filteredProducts = allProducts.filter(product => {
         const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory || (selectedCategory === 'Merch' && (product.name.includes('Gold') || product.name.includes('Diamond') || product.name.includes('Platinum')));
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
-    const handleQuickCheckout = (e: React.MouseEvent, product: Product) => {
+    const handleQuickCheckout = (e: React.MouseEvent, product: any) => {
         e.preventDefault();
-        addToCart(product);
-        setShowCheckout(true);
+        if (product.isExternal) {
+            window.open(product.affiliateLink, '_blank');
+        } else {
+            addToCart(product);
+            setShowCheckout(true);
+        }
     };
 
     return (
@@ -186,7 +201,7 @@ export default function ShopPage() {
 
                 {/* Filters & Search - KEEPING DATA-DRIVEN */}
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
+                    <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto font-sans">
                         {categories.map(category => (
                             <button
                                 key={category}
@@ -214,12 +229,19 @@ export default function ShopPage() {
 
                 {/* PRODUCT GRID - NOW WITH LINKS + CHECKOUT ON HOVER (BOTTOM) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-                    {filteredProducts.map((product) => (
+                    {filteredProducts.map((product: any) => (
                         <div key={product.id} className="relative group">
                             {/* Product Card */}
-                            <Link href={`/shop/product/${product.id}`} className="block h-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-fuchsia-500/50 hover:shadow-lg hover:shadow-fuchsia-500/10 transition-all cursor-pointer relative">
-                                <div className="aspect-square bg-zinc-800 relative overflow-hidden">
-                                    <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <div onClick={(e) => handleQuickCheckout(e, product)} className="block h-full bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 hover:border-fuchsia-500/50 hover:shadow-lg hover:shadow-fuchsia-500/10 transition-all cursor-pointer relative">
+                                <div className="aspect-square bg-zinc-800 relative overflow-hidden flex items-center justify-center">
+                                    {product.image ? (
+                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    ) : (
+                                        <div className="text-4xl text-zinc-700">
+                                            {product.category === 'Toys' ? '🔌' : '🛍️'}
+                                        </div>
+                                    )}
+
                                     {product.category !== 'Tokens' && (
                                         <div className="absolute top-2 right-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded uppercase">
                                             {product.category}
@@ -229,10 +251,13 @@ export default function ShopPage() {
                                     {/* HOVER CHECKOUT BUTTON (BOTTOM) */}
                                     <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-20">
                                         <button
-                                            onClick={(e) => handleQuickCheckout(e, product)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent double trigger
+                                                handleQuickCheckout(e, product);
+                                            }}
                                             className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-2 rounded-lg shadow-lg flex items-center justify-center gap-2 uppercase text-xs tracking-wider"
                                         >
-                                            <FaCreditCard /> Checkout
+                                            {product.isExternal ? <><FaCreditCard /> Buy on Lovense</> : <><FaCreditCard /> Checkout</>}
                                         </button>
                                     </div>
 
@@ -247,8 +272,9 @@ export default function ShopPage() {
                                             <FaStar className="text-yellow-500" /> {product.rating}
                                         </div>
                                     </div>
+                                    {product.isExternal && <p className="text-[10px] text-zinc-500 mt-1 truncate">{product.description}</p>}
                                 </div>
-                            </Link>
+                            </div>
 
                         </div>
                     ))}
