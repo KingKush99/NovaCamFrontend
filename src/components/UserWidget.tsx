@@ -14,13 +14,14 @@ export default function UserWidget() {
 
     useEffect(() => {
         if (session?.user && !user) {
-            // Initialize store user from session
             setUser({
+                id: session.user.email || 'demo-user-1',
                 username: session.user.name || 'User',
                 xp: 0,
                 tier: 1,
                 tokens: 100, // Starting tokens
                 wins: { meme: 0, pornstar: 0 },
+                inventory: [],
                 achievements: []
             });
         }
