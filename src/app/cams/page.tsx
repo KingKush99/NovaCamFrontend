@@ -2,70 +2,63 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { FaPlay, FaExternalLinkAlt, FaSync, FaUser } from 'react-icons/fa';
+import { FaPlay, FaExternalLinkAlt, FaSync } from 'react-icons/fa';
 
 // Affiliate codes
 const TOUR = 'LQps';
 const CAMPAIGN = 'QvtQPh';
 
-// Large list of known active models - updated regularly
-const MODELS_DATABASE = {
-    women: [
-        'sexydea', 'wetdream111', 'emma_roberts77', 'ameliequeeen', 'amyjonesee',
-        'scarlet_baker', 'paulina_and_alex', 'jessicaslaughter_', 'hanna_cox', 'sweetie_millsa',
-        'scarlett_deville', 'ellaa91', 'meghan_roose', 'madnesslola', 'sasha_divine',
-        'sharlotta_sweet', 'lindamei', 'ameliajohns', 'valerynice', 'sexycarmen',
-        'lilimissarabic', 'indianspice24', 'hotnatalia', 'sativa_dreams', 'babybelle_',
-        'miss_fleur', 'hunnygirl', 'sexybabe99', 'tina_ross', 'alexaa_sweet'
-    ],
-    men: [
-        'bigcock_stud', 'musclejock', 'alphamale', 'hotdude99', 'sexyboy',
-        'fitguy', 'strongman', 'hugecock', 'athletic_guy', 'bearded_hunk'
-    ],
-    couples: [
-        'hotcouple', 'lovebirds', 'passion_pair', 'wild_duo', 'sexy_partners',
-        'fun_couple', 'naughty_pair', 'hot_lovers', 'adventure_duo', 'playful_couple'
-    ],
-    trans: [
-        'sexy_ts', 'beautiful_trans', 'hot_shemale', 'ts_angel', 'trans_beauty',
-        'gorgeous_ts', 'amazing_trans', 'lovely_ts', 'pretty_trans', 'stunning_ts'
-    ]
-};
+interface Performer {
+    username: string;
+    thumbnail: string;
+    affiliateLink: string;
+}
 
 function CamsContent() {
     const searchParams = useSearchParams();
     const category = searchParams.get('category') || 'women';
     const [loading, setLoading] = useState(true);
-    const [models, setModels] = useState<string[]>([]);
+    const [performers, setPerformers] = useState<Performer[]>([]);
     const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
-    useEffect(() => {
-        // Select models based on category
-        const categoryKey = category.toLowerCase() as keyof typeof MODELS_DATABASE;
-        const categoryModels = MODELS_DATABASE[categoryKey] || MODELS_DATABASE.women;
+    // Map categories to gender codes
+    const genderMap: Record<string, string> = {
+        'featured': '',
+        'women': 'f',
+        'men': 'm',
+        'couples': 'c',
+        'trans': 't',
+    };
 
-        // Shuffle for variety
-        const shuffled = [...categoryModels].sort(() => Math.random() - 0.5);
-        setModels(shuffled);
-        setLoading(false);
+    const fetchPerformers = async () => {
+        setLoading(true);
         setFailedImages(new Set());
+
+        try {
+            const gender = genderMap[category.toLowerCase()] || 'f';
+            const res = await fetch(`/api/performers?gender=${gender}&limit=50`);
+            const data = await res.json();
+
+            if (data.performers && data.performers.length > 0) {
+                setPerformers(data.performers);
+            }
+        } catch (error) {
+            console.error('Failed to fetch performers:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPerformers();
     }, [category]);
 
     const handleImageError = (username: string) => {
         setFailedImages(prev => new Set([...prev, username]));
     };
 
-    const refreshModels = () => {
-        const categoryKey = category.toLowerCase() as keyof typeof MODELS_DATABASE;
-        const categoryModels = MODELS_DATABASE[categoryKey] || MODELS_DATABASE.women;
-        const shuffled = [...categoryModels].sort(() => Math.random() - 0.5);
-        setModels(shuffled);
-        setFailedImages(new Set());
-    };
-
-    // Filter out models whose thumbnails failed to load
-    const visibleModels = models.filter(m => !failedImages.has(m));
+    // Filter out performers whose thumbnails failed to load (offline)
+    const visiblePerformers = performers.filter(p => !failedImages.has(p.username));
 
     return (
         <div className="text-white">
@@ -77,15 +70,16 @@ function CamsContent() {
                         {category.charAt(0).toUpperCase() + category.slice(1)} Cams
                     </h1>
                     <p className="text-zinc-500 text-sm">
-                        Live Streams • Click to watch
+                        {visiblePerformers.length} Live Streams
                     </p>
                 </div>
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={refreshModels}
-                        className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors"
+                        onClick={fetchPerformers}
+                        disabled={loading}
+                        className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm transition-colors disabled:opacity-50"
                     >
-                        <FaSync /> Refresh
+                        <FaSync className={loading ? 'animate-spin' : ''} /> Refresh
                     </button>
                     <a
                         href={`https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}`}
@@ -101,33 +95,36 @@ function CamsContent() {
             {/* Loading State */}
             {loading && (
                 <div className="flex items-center justify-center h-64">
-                    <div className="animate-spin w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full"></div>
+                    <div className="text-center">
+                        <div className="animate-spin w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                        <p className="text-zinc-500">Loading live cams...</p>
+                    </div>
                 </div>
             )}
 
             {/* Grid */}
-            {!loading && (
+            {!loading && visiblePerformers.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {visibleModels.map((username) => (
+                    {visiblePerformers.map((performer) => (
                         <a
-                            key={username}
-                            href={`https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=embed&room=${username}`}
+                            key={performer.username}
+                            href={performer.affiliateLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="relative aspect-video bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800 group hover:border-fuchsia-500 transition-all hover:scale-[1.02]"
                         >
-                            {/* Thumbnail from Chaturbate CDN */}
+                            {/* Thumbnail */}
                             <img
-                                src={`https://roomimg.stream.highwebmedia.com/ri/${username}.jpg`}
-                                alt={username}
+                                src={performer.thumbnail}
+                                alt={performer.username}
                                 className="w-full h-full object-cover"
-                                onError={() => handleImageError(username)}
+                                onError={() => handleImageError(performer.username)}
                             />
 
                             {/* Overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-white font-bold text-sm truncate">{username}</span>
+                                    <span className="text-white font-bold text-sm truncate">{performer.username}</span>
                                     <span className="bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                                         <span className="w-1 h-1 bg-white rounded-full animate-pulse"></span>
                                         LIVE
@@ -146,25 +143,24 @@ function CamsContent() {
                 </div>
             )}
 
-            {/* No models message */}
-            {!loading && visibleModels.length === 0 && (
-                <div className="text-center py-12">
-                    <FaUser className="text-4xl text-zinc-700 mx-auto mb-4" />
-                    <p className="text-zinc-500 mb-4">No models currently online in this category</p>
-                    <a
-                        href={`https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block bg-fuchsia-600 hover:bg-fuchsia-500 px-6 py-3 rounded-lg font-bold transition-colors"
-                    >
-                        Browse on Chaturbate
-                    </a>
+            {/* No performers - show fallback grid from Chaturbate */}
+            {!loading && visiblePerformers.length === 0 && (
+                <div className="text-center py-8">
+                    <p className="text-zinc-500 mb-6">Loading streams from Chaturbate...</p>
+                    {/* Embed Chaturbate's widget as fallback */}
+                    <div className="w-full">
+                        <iframe
+                            src={`https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=embed`}
+                            className="w-full h-[600px] border-0 rounded-lg"
+                            allow="autoplay"
+                        />
+                    </div>
                 </div>
             )}
 
             {/* Footer */}
             <div className="mt-6 text-center text-zinc-600 text-[10px]">
-                Click any cam to watch on Chaturbate • Powered by Chaturbate
+                Click any cam to watch • Powered by Chaturbate
             </div>
         </div>
     );
