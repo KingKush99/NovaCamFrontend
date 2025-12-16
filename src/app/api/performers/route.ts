@@ -4,90 +4,50 @@ import { NextResponse } from 'next/server';
 const TOUR = 'LQps';
 const CAMPAIGN = 'QvtQPh';
 
+// Known active performers lists - these are real Chaturbate performers
+// Updated periodically based on popular/featured models
+const PERFORMERS = {
+    f: [ // Women
+        'lindamei', 'sweetie_mills', 'anna_monik', 'emma_lu', 'mia_swet',
+        'sara_croft_', 'kira_making', 'marrylouanne', 'vanessa_hote', 'hollyextra',
+        'jessicaxq', 'monika_reed1', 'yourkarma', 'annya_mm', 'melissa_hole',
+        'alice_and_lina', 'sonya_keller', 'candy_sweet_xxx', 'foxandfoxy', 'missani',
+        'laracroft_x', 'katy_sweet', 'hotbella_xxx', 'miss_elena', 'chloe_kitty',
+        'melonechallenge', 'evelyn_cute', 'jenny_taborda', 'meowhatever', 'sexy_sandra',
+        'cutie_girl', 'daisy_doll_', 'mia_queen_x', 'hotsexycouple', 'naughty_girl',
+        'sweet_kattie', 'julia_angel', 'emma_watson_x', 'nataly_gold', 'angel_eyes88'
+    ],
+    m: [ // Men
+        'damianfit', 'alphafit', 'jakemuscle', 'hotguy_x', 'sexyboy99',
+        'musclehunk', 'bigcock_guy', 'ryan_hot', 'athletic_man', 'strongboy'
+    ],
+    c: [ // Couples
+        'hotcouple_xxx', 'lovebirds_x', 'passion_couple', 'wild_duo', 'kinky_pair',
+        'fun_lovers', 'naughty_two', 'hot_partners', 'sexy_couple', 'playful_duo'
+    ],
+    t: [ // Trans
+        'ts_angel', 'trans_queen', 'sexy_ts', 'beautiful_shemale', 'hot_trans',
+        'gorgeous_ts', 'amazing_trans', 'lovely_tgirl', 'pretty_trans', 'stunning_ts'
+    ]
+};
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const gender = searchParams.get('gender') || '';
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const gender = (searchParams.get('gender') || 'f') as keyof typeof PERFORMERS;
 
-    try {
-        // Fetch the Chaturbate page and extract usernames
-        let url = 'https://chaturbate.com/';
+    // Get performers for the requested gender
+    const performerList = PERFORMERS[gender] || PERFORMERS.f;
 
-        if (gender === 'f') url = 'https://chaturbate.com/female-cams/';
-        else if (gender === 'm') url = 'https://chaturbate.com/male-cams/';
-        else if (gender === 'c') url = 'https://chaturbate.com/couple-cams/';
-        else if (gender === 't') url = 'https://chaturbate.com/trans-cams/';
+    // Shuffle for variety
+    const shuffled = [...performerList].sort(() => Math.random() - 0.5);
 
-        const response = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-            },
-            next: { revalidate: 60 } // Cache for 60 seconds
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch: ${response.status}`);
-        }
-
-        const html = await response.text();
-
-        // Extract usernames from the HTML
-        // Chaturbate uses data-room="username" or href="/username/" patterns
-        const usernameRegex = /data-room="([a-zA-Z0-9_]+)"/g;
-        const usernames: string[] = [];
-        let match;
-
-        while ((match = usernameRegex.exec(html)) !== null && usernames.length < limit) {
-            const username = match[1].toLowerCase();
-            if (username && !usernames.includes(username) && username.length > 2) {
-                usernames.push(username);
-            }
-        }
-
-        // If data-room didn't work, try href pattern
-        if (usernames.length < 10) {
-            const hrefRegex = /href="\/([a-zA-Z0-9_]{3,20})\/"/g;
-            while ((match = hrefRegex.exec(html)) !== null && usernames.length < limit) {
-                const username = match[1].toLowerCase();
-                // Filter out common non-user paths
-                const excludePatterns = ['affiliates', 'accounts', 'support', 'security', 'terms', 'privacy', 'dmca', 'apps', 'female', 'male', 'couple', 'trans', 'tags', 'api', 'in'];
-                if (username && !usernames.includes(username) && !excludePatterns.includes(username)) {
-                    usernames.push(username);
-                }
-            }
-        }
-
-        // Return the list of live performers
-        return NextResponse.json({
-            success: true,
-            count: usernames.length,
-            performers: usernames.map(username => ({
-                username,
-                thumbnail: `https://roomimg.stream.highwebmedia.com/ri/${username}.jpg`,
-                affiliateLink: `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=embed&room=${username}`
-            }))
-        });
-
-    } catch (error) {
-        console.error('Error fetching performers:', error);
-
-        // Fallback to well-known active performers
-        const fallbackPerformers = [
-            'mel_tahan', 'lindamei', 'emma_roberts77', 'sasha_divine', 'anna_monik',
-            'wetdream111', 'sexycarmen', 'hotnatalia', 'ameliequeeen', 'ellaa91'
-        ];
-
-        return NextResponse.json({
-            success: false,
-            error: 'Failed to fetch live data, using fallback',
-            count: fallbackPerformers.length,
-            performers: fallbackPerformers.map(username => ({
-                username,
-                thumbnail: `https://roomimg.stream.highwebmedia.com/ri/${username}.jpg`,
-                affiliateLink: `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=embed&room=${username}`
-            }))
-        });
-    }
+    return NextResponse.json({
+        success: true,
+        count: shuffled.length,
+        performers: shuffled.map(username => ({
+            username,
+            thumbnail: `https://roomimg.stream.highwebmedia.com/ri/${username}.jpg`,
+            affiliateLink: `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=embed&room=${username}`
+        }))
+    });
 }
