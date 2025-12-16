@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pornstar Name Quiz - Affiliate Nova</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Your main site styles -->
+    <link rel="stylesheet" href="pornstar-styles.css"> <!-- New game-specific styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Affiliate Nova</div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="games.html">Meme Quiz</a></li>
+                <li><a href="pornstar-quiz.html" class="active">Pornstar Quiz</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="game-main">
+        <div id="game-container">
+            <!-- Lobby Screen -->
+            <div id="lobby-screen">
+                <h1>Pornstar Name Quiz</h1>
+                <p>2-4 Players. Enter your names to join the game.</p>
+                <div id="player-join">
+                    <input type="text" id="player-name-input" placeholder="Enter player name...">
+                    <button id="add-player-button">Add Player</button>
+                </div>
+                <h3>Players Joined:</h3>
+                <ul id="player-list"></ul>
+                <button id="start-game-button" disabled>Start Game (2 players needed)</button>
+                <p id="lobby-timer"></p>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" class="hidden">
+                <div id="stats-bar">
+                    <span id="round-info">Round: 1 / 10</span>
+                    <span id="current-player-turn"></span>
+                    <span id="timer-info">Time: 30</span>
+                </div>
+                <div id="image-grid">
+                    <div class="image-wrapper">
+                        <img id="game-image-0" src="">
+                        <input type="text" class="answer-input" data-index="0" placeholder="Guess the name...">
+                    </div>
+                    <div class="image-wrapper">
+                        <img id="game-image-1" src="">
+                        <input type="text" class="answer-input" data-index="1" placeholder="Guess the name...">
+                    </div>
+                    <div class="image-wrapper">
+                        <img id="game-image-2" src="">
+                        <input type="text" class="answer-input" data-index="2" placeholder="Guess the name...">
+                    </div>
+                    <div class="image-wrapper">
+                        <img id="game-image-3" src="">
+                        <input type="text" class="answer-input" data-index="3" placeholder="Guess the name...">
+                    </div>
+                </div>
+                <div id="player-scores"></div>
+            </div>
+
+            <!-- End Game Screen -->
+            <div id="end-screen" class="hidden">
+                <h1>Game Over!</h1>
+                <h3>Final Scores:</h3>
+                <ol id="final-scoreboard"></ol>
+                <button id="restart-button">Play Again</button>
+            </div>
+        </div>
+    </main>
+    
+    <script src="pornstar-script.js"></script>
+</body>
+</html>

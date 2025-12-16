@@ -23,7 +23,8 @@ export default function Header() {
         </Link>
         <div className="flex items-center space-x-4 h-8">
           <Link href="/marketplace" className="hover:text-gray-300">Marketplace</Link>
-          
+          <Link href="/cams" className="hover:text-fuchsia-400 font-bold text-fuchsia-300">Novelty Cams</Link>
+
           {/* This will now correctly render our intelligent AuthLinks component */}
           <AuthLinks />
         </div>

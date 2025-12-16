@@ -1,0 +1,15 @@
+{
+  "name": "NovaCoin Genesis",
+  "description": "The original NovaCoin issued in 2025. This coin is the base currency for the Nova ecosystem.",
+  "image": "ipfs://QmWigLVQsmbYuXD1m3ACGc8LGSVUTMqXrKfMSx6BsjmHBv",
+  "attributes": [
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Year",
+      "value": "2025"
+    }
+  ]
+}

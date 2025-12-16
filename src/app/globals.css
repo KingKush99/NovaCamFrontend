@@ -1,29 +1,69 @@
-/*
-// FILE: src/app/globals.css
-// PURPOSE: Updated styles for better legibility and a new font.
-*/
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Light mode by default for better legibility */
-  --background: #f0f2f5; /* A soft, light grey background */
-  --foreground: #1c1e21; /* A dark, almost-black for text */
-}
-
-@media (prefers-color-scheme: dark) {
-  /* You can define a separate dark theme here if you wish */
-  :root {
-    --background: #1c1e21;
-    --foreground: #f0f2f5;
-  }
+  --background: #0f0f13;
+  --foreground: #ffffff;
+  
+  /* Brand Colors */
+  --primary: #d946ef; /* Fuchsia 500 */
+  --primary-glow: rgba(217, 70, 239, 0.5);
+  --secondary: #8b5cf6; /* Violet 500 */
+  --accent: #f59e0b; /* Amber 500 */
+  
+  /* UI Colors */
+  --card-bg: #18181b;
+  --card-border: #27272a;
+  --input-bg: #27272a;
+  
+  /* Tier Colors */
+  --tier-1: #6B7280;
+  --tier-2: #10B981;
+  --tier-3: #3B82F6;
+  --tier-4: #8B5CF6;
+  --tier-5: #EC4899;
+  --tier-6: #F59E0B;
+  --tier-7: #EF4444;
+  --tier-8: #14B8A6;
+  --tier-9: #A855F7;
+  --tier-10: #FFD700;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  /* THE FONT CHANGE IS HERE */
-  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom Utilities */
+.text-glow {
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.border-glow {
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.neon-border {
+  border: 1px solid var(--primary);
+  box-shadow: 0 0 5px var(--primary), inset 0 0 5px var(--primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }

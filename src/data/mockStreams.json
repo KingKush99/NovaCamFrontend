@@ -1,0 +1,92 @@
+[
+    {
+        "id": "1",
+        "username": "emma_claire",
+        "gender": "f",
+        "age": 24,
+        "viewers": 12543,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/emma_claire.jpg",
+        "tags": [
+            "brunette",
+            "interactive",
+            "gaming"
+        ],
+        "isGamified": true,
+        "currentActivity": "Playing Name That Meme"
+    },
+    {
+        "id": "2",
+        "username": "sarah_sweet",
+        "gender": "f",
+        "age": 21,
+        "viewers": 8932,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/sarah_sweet.jpg",
+        "tags": [
+            "blonde",
+            "cosplay",
+            "chill"
+        ],
+        "isGamified": false,
+        "currentActivity": "Just Chatting"
+    },
+    {
+        "id": "3",
+        "username": "couple_goals_xo",
+        "gender": "c",
+        "age": 26,
+        "viewers": 5621,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/couple_goals_xo.jpg",
+        "tags": [
+            "alt",
+            "tattoo",
+            "music"
+        ],
+        "isGamified": true,
+        "currentActivity": "Spectating Tournament"
+    },
+    {
+        "id": "4",
+        "username": "alex_king",
+        "gender": "m",
+        "age": 22,
+        "viewers": 4102,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/alex_king.jpg",
+        "tags": [
+            "asian",
+            "petite",
+            "dancing"
+        ],
+        "isGamified": false,
+        "currentActivity": null
+    },
+    {
+        "id": "5",
+        "username": "bella_rose",
+        "gender": "f",
+        "age": 25,
+        "viewers": 3890,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/bella_rose.jpg",
+        "tags": [
+            "latina",
+            "curvy",
+            "oil"
+        ],
+        "isGamified": true,
+        "currentActivity": "Name That Pornstar"
+    },
+    {
+        "id": "6",
+        "username": "jessy_trans",
+        "gender": "s",
+        "age": 23,
+        "viewers": 2450,
+        "thumbnail": "https://roomimg.stream.highwebmedia.com/ri/jessy_trans.jpg",
+        "tags": [
+            "redhead",
+            "piercings",
+            "toys"
+        ],
+        "isGamified": false,
+        "currentActivity": null
+    }
+]

@@ -1,11 +1,5 @@
-//
-// FILE: next.config.js
-//
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // --- THIS IS THE FIX ---
-  // We are adding this 'images' configuration block.
   images: {
     remotePatterns: [
       {
@@ -14,9 +8,27 @@ const nextConfig = {
         port: '',
         pathname: '/ipfs/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.mixkit.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'roomimg.stream.highwebmedia.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
+    unoptimized: true,
   },
-  // --- END OF FIX ---
 };
 
 module.exports = nextConfig;

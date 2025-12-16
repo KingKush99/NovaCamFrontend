@@ -1,16 +1,16 @@
-// FILE: src/app/layout.tsx (This code is correct)
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css"; // This import will now work
-import { AuthProvider } from "@/context/AuthContext";
-import Header from "@/components/Header";
+import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+import GoogleAdSense from "@/components/GoogleAdSense";
+import MiniChatbot from "@/components/MiniChatbot";
+import MiniSlots from "@/components/MiniSlots";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nova Cam",
-  description: "Your NFT Marketplace",
+  title: "Novelty Cams",
+  description: "Gamified Live Streaming Platform",
 };
 
 export default function RootLayout({
@@ -20,13 +20,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
-          <Header />
-          <main className="container mx-auto p-4">
-            {children}
-          </main>
+          {children}
+          <MiniChatbot />
+          <MiniSlots />
         </AuthProvider>
+        <GoogleAdSense pId={process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID || ""} />
       </body>
     </html>
   );
