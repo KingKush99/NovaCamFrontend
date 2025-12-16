@@ -1,7 +1,3 @@
 {
-  "/arcade/page": "app/arcade/page.js",
-  "/arcade/play/[gameId]/page": "app/arcade/play/[gameId]/page.js",
-  "/shop/page": "app/shop/page.js",
-  "/apps/page": "app/apps/page.js",
   "/cams/page": "app/cams/page.js"
 }
