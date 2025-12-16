@@ -1,8 +1,7 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/arcade/page": "app/arcade/page.js",
+  "/arcade/play/[gameId]/page": "app/arcade/play/[gameId]/page.js",
   "/shop/page": "app/shop/page.js",
-  "/profile/[username]/page": "app/profile/[username]/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/cams/room/[username]/page": "app/cams/room/[username]/page.js",
+  "/apps/page": "app/apps/page.js",
   "/cams/page": "app/cams/page.js"
 }
