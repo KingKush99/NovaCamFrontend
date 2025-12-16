@@ -169,12 +169,26 @@ export default function GlobalHeader() {
               </Link>
             );
           })}
-          <Link
-            href="/arcade/play/meme"
-            className="px-6 py-3 text-sm font-bold uppercase text-fuchsia-600 hover:text-fuchsia-500 transition-colors ml-auto flex items-center gap-2 whitespace-nowrap"
-          >
-            <FaGamepad /> ARCADE
-          </Link>
+          {/* Games Dropdown */}
+          <div className="relative group ml-auto">
+            <button className="px-6 py-3 text-sm font-bold uppercase text-fuchsia-600 hover:text-fuchsia-500 transition-colors flex items-center gap-2 whitespace-nowrap">
+              <FaGamepad /> GAMES <FaChevronDown className="text-xs" />
+            </button>
+            <div className="absolute right-0 top-full bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 min-w-[200px]">
+              <Link
+                href="/arcade/play/meme"
+                className="block px-4 py-3 text-sm font-bold text-white hover:bg-fuchsia-600 transition-colors rounded-t-lg"
+              >
+                🎭 Name That Meme
+              </Link>
+              <Link
+                href="/arcade/play/pornstar"
+                className="block px-4 py-3 text-sm font-bold text-white hover:bg-fuchsia-600 transition-colors rounded-b-lg"
+              >
+                ⭐ Who's the Pornstar
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

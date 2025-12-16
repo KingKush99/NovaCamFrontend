@@ -7,7 +7,7 @@ import { useGameStore } from '@/store/useGameStore';
 import { useUserStore } from '@/store/useUserStore';
 import { checkMultipleAnswers } from '@/lib/fuzzyMatch';
 import memesData from '@/data/memes.json';
-import { FaClock, FaCheck, FaTimes, FaUsers, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { FaClock, FaCheck, FaTimes, FaUsers, FaVolumeUp, FaVolumeMute, FaTrophy } from 'react-icons/fa';
 import confetti from 'canvas-confetti';
 
 // Simulated Opponents
@@ -17,6 +17,83 @@ const OPPONENTS = [
     { name: 'PepeHands', color: 'text-green-400' },
     { name: 'RickRoller', color: 'text-blue-400' }
 ];
+
+// Leaderboard Component
+function Leaderboard({ score, currentRound, countdown, isGameOver, opponentScores }: {
+    score: number;
+    currentRound: number;
+    countdown: number;
+    isGameOver: boolean;
+    opponentScores: Record<string, number>;
+}) {
+    const allPlayers = [
+        { name: 'You', score: score, isPlayer: true },
+        ...OPPONENTS.map(opp => ({ name: opp.name, score: opponentScores[opp.name] || 0, isPlayer: false }))
+    ].sort((a, b) => b.score - a.score).map((p, i) => ({ ...p, rank: i + 1 }));
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        >
+            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                <div className="text-center mb-6">
+                    <FaTrophy className="text-5xl text-yellow-500 mx-auto mb-4" />
+                    <h2 className="text-2xl font-black text-white">
+                        {isGameOver ? 'GAME OVER!' : 'LEADERBOARD'}
+                    </h2>
+                    {!isGameOver && (
+                        <p className="text-zinc-400 text-sm mt-2">
+                            Round {currentRound} of 5
+                        </p>
+                    )}
+                </div>
+
+                {/* Leaderboard List */}
+                <div className="space-y-2 mb-6">
+                    {allPlayers.map((player) => (
+                        <div
+                            key={player.name}
+                            className={`flex items-center gap-3 p-3 rounded-lg ${player.isPlayer
+                                    ? 'bg-fuchsia-600/20 border border-fuchsia-500'
+                                    : 'bg-zinc-800'
+                                }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${player.rank === 1 ? 'bg-yellow-500 text-black' :
+                                    player.rank === 2 ? 'bg-gray-400 text-black' :
+                                        player.rank === 3 ? 'bg-orange-600 text-white' :
+                                            'bg-zinc-700 text-white'
+                                }`}>
+                                {player.rank}
+                            </div>
+                            <span className={`flex-1 font-bold ${player.isPlayer ? 'text-fuchsia-400' : 'text-white'}`}>
+                                {player.name}
+                            </span>
+                            <span className="text-green-400 font-mono font-bold">
+                                {player.score}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Countdown or Final Score */}
+                {isGameOver ? (
+                    <div className="text-center">
+                        <p className="text-zinc-400 mb-2">Final Score</p>
+                        <p className="text-4xl font-black text-green-400">{score}</p>
+                    </div>
+                ) : (
+                    <div className="text-center">
+                        <p className="text-zinc-400 text-sm">Next round in</p>
+                        <p className="text-5xl font-black text-fuchsia-500">{countdown}</p>
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
+}
 
 export default function NameThatMeme() {
     const {
@@ -36,6 +113,11 @@ export default function NameThatMeme() {
     const [muted, setMuted] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    // Leaderboard State
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+    const [gameOver, setGameOver] = useState(false);
+
     // Initialize round
     useEffect(() => {
         if (currentRound > 5) {
@@ -50,6 +132,8 @@ export default function NameThatMeme() {
         setFeedback(null);
         setInput('');
         setTimeRemaining(15);
+        setShowLeaderboard(false);
+        setCountdown(3);
 
         // Focus input
         setTimeout(() => inputRef.current?.focus(), 100);
@@ -79,14 +163,33 @@ export default function NameThatMeme() {
         return () => clearInterval(timer);
     }, [timeRemaining, roundOver, isPlaying]);
 
+    // Leaderboard countdown
+    useEffect(() => {
+        if (!showLeaderboard || gameOver) return;
+
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setShowLeaderboard(false);
+                    nextRound();
+                    return 3;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [showLeaderboard, gameOver]);
+
     // Soundtrack
     useEffect(() => {
-        audioRef.current = new Audio('/assets/sounds/arcade_loop.mp3'); // Placeholder path
+        audioRef.current = new Audio('/assets/sounds/arcade_loop.mp3');
         audioRef.current.loop = true;
         audioRef.current.volume = 0.3;
 
         if (isPlaying && !muted) {
-            audioRef.current.play().catch(() => { }); // Catch autoplay errors
+            audioRef.current.play().catch(() => { });
         }
 
         return () => {
@@ -104,7 +207,10 @@ export default function NameThatMeme() {
     const handleTimeUp = () => {
         setFeedback('wrong');
         setRoundOver(true);
-        setTimeout(nextRound, 3000); // Longer delay to read answer
+        // Show leaderboard after brief delay
+        setTimeout(() => {
+            setShowLeaderboard(true);
+        }, 1500);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -123,19 +229,23 @@ export default function NameThatMeme() {
                 spread: 60,
                 origin: { y: 0.7 }
             });
-            setTimeout(nextRound, 2000);
+            // Show leaderboard after brief delay
+            setTimeout(() => {
+                setShowLeaderboard(true);
+            }, 1500);
         } else {
-            // Shake effect could go here
             setInput('');
         }
     };
 
     const handleGameOver = () => {
+        setGameOver(true);
+        setShowLeaderboard(true);
         endGame();
-        addXP(score); // 1 XP per point
+        addXP(score);
         if (score > 300) {
             addWin('meme');
-            addTokens(50); // Bonus tokens for high score
+            addTokens(50);
         }
     };
 
@@ -143,6 +253,19 @@ export default function NameThatMeme() {
 
     return (
         <div className="flex gap-6 w-full max-w-6xl mx-auto p-4 flex-col lg:flex-row items-start">
+
+            {/* Leaderboard Overlay */}
+            <AnimatePresence>
+                {showLeaderboard && (
+                    <Leaderboard
+                        score={score}
+                        currentRound={currentRound}
+                        countdown={countdown}
+                        isGameOver={gameOver}
+                        opponentScores={opponentScores}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Main Game Area */}
             <div className="flex-1 w-full max-w-2xl mx-auto">

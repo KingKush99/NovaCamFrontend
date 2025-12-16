@@ -6,8 +6,88 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/useGameStore';
 import { useUserStore } from '@/store/useUserStore';
 import performersData from '@/data/performers.json';
-import { FaClock, FaHeart, FaSkull } from 'react-icons/fa';
+import { FaClock, FaHeart, FaSkull, FaTrophy, FaMedal } from 'react-icons/fa';
 import confetti from 'canvas-confetti';
+
+// Leaderboard Component
+function Leaderboard({ score, currentRound, countdown, isGameOver }: {
+    score: number;
+    currentRound: number;
+    countdown: number;
+    isGameOver: boolean;
+}) {
+    // Mock leaderboard data (in production, fetch from API)
+    const leaderboard = [
+        { rank: 1, name: 'ProGamer99', score: 1800 },
+        { rank: 2, name: 'QuizMaster', score: 1600 },
+        { rank: 3, name: 'StarFinder', score: 1400 },
+        { rank: 4, name: 'You', score: score, isPlayer: true },
+        { rank: 5, name: 'NovicePlayer', score: 800 },
+    ].sort((a, b) => b.score - a.score).map((p, i) => ({ ...p, rank: i + 1 }));
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        >
+            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                <div className="text-center mb-6">
+                    <FaTrophy className="text-5xl text-yellow-500 mx-auto mb-4" />
+                    <h2 className="text-2xl font-black text-white">
+                        {isGameOver ? 'GAME OVER!' : 'LEADERBOARD'}
+                    </h2>
+                    {!isGameOver && (
+                        <p className="text-zinc-400 text-sm mt-2">
+                            Round {currentRound} of 10
+                        </p>
+                    )}
+                </div>
+
+                {/* Leaderboard List */}
+                <div className="space-y-2 mb-6">
+                    {leaderboard.map((player) => (
+                        <div
+                            key={player.name}
+                            className={`flex items-center gap-3 p-3 rounded-lg ${player.isPlayer
+                                    ? 'bg-fuchsia-600/20 border border-fuchsia-500'
+                                    : 'bg-zinc-800'
+                                }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${player.rank === 1 ? 'bg-yellow-500 text-black' :
+                                    player.rank === 2 ? 'bg-gray-400 text-black' :
+                                        player.rank === 3 ? 'bg-orange-600 text-white' :
+                                            'bg-zinc-700 text-white'
+                                }`}>
+                                {player.rank}
+                            </div>
+                            <span className={`flex-1 font-bold ${player.isPlayer ? 'text-fuchsia-400' : 'text-white'}`}>
+                                {player.name}
+                            </span>
+                            <span className="text-green-400 font-mono font-bold">
+                                {player.score}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Countdown or Final Score */}
+                {isGameOver ? (
+                    <div className="text-center">
+                        <p className="text-zinc-400 mb-2">Final Score</p>
+                        <p className="text-4xl font-black text-green-400">{score}</p>
+                    </div>
+                ) : (
+                    <div className="text-center">
+                        <p className="text-zinc-400 text-sm">Next round in</p>
+                        <p className="text-5xl font-black text-fuchsia-500">{countdown}</p>
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
+}
 
 export default function NameThatPornstar() {
     const {
@@ -21,10 +101,13 @@ export default function NameThatPornstar() {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [roundOver, setRoundOver] = useState(false);
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [countdown, setCountdown] = useState(3);
+    const [gameOver, setGameOver] = useState(false);
 
     // Initialize round
     useEffect(() => {
-        if (currentRound > 10) { // 10 rounds for this game
+        if (currentRound > 10) {
             handleGameOver();
             return;
         }
@@ -33,13 +116,12 @@ export default function NameThatPornstar() {
         const target = performersData[Math.floor(Math.random() * performersData.length)];
         setTargetPerformer(target);
 
-        // Select 3 distractors (ensure unique)
+        // Select 3 distractors
         const distractors = performersData
             .filter(p => p.id !== target.id)
             .sort(() => 0.5 - Math.random())
             .slice(0, 3);
 
-        // Shuffle options
         const allOptions = [target, ...distractors].sort(() => 0.5 - Math.random());
         setOptions(allOptions);
 
@@ -47,6 +129,8 @@ export default function NameThatPornstar() {
         setSelectedOption(null);
         setIsCorrect(null);
         setTimeRemaining(10);
+        setShowLeaderboard(false);
+        setCountdown(3);
     }, [currentRound]);
 
     // Timer logic
@@ -64,10 +148,32 @@ export default function NameThatPornstar() {
         return () => clearInterval(timer);
     }, [timeRemaining, roundOver, isPlaying]);
 
+    // Leaderboard countdown
+    useEffect(() => {
+        if (!showLeaderboard || gameOver) return;
+
+        const timer = setInterval(() => {
+            setCountdown(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setShowLeaderboard(false);
+                    nextRound();
+                    return 3;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, [showLeaderboard, gameOver]);
+
     const handleTimeUp = () => {
         setIsCorrect(false);
         setRoundOver(true);
-        setTimeout(nextRound, 3000);
+        // Show leaderboard for 3 seconds
+        setTimeout(() => {
+            setShowLeaderboard(true);
+        }, 500);
     };
 
     const handleSelect = (performerId: string) => {
@@ -79,20 +185,23 @@ export default function NameThatPornstar() {
         setRoundOver(true);
 
         if (correct) {
-            updateScore(200); // 200 points per correct answer
+            updateScore(200);
             confetti({
                 particleCount: 30,
                 spread: 50,
                 origin: { y: 0.6 }
             });
-            setTimeout(nextRound, 1500);
-        } else {
-            // Delay for wrong answer to see correction
-            setTimeout(nextRound, 3000);
         }
+
+        // Show leaderboard after a brief delay
+        setTimeout(() => {
+            setShowLeaderboard(true);
+        }, 1000);
     };
 
     const handleGameOver = () => {
+        setGameOver(true);
+        setShowLeaderboard(true);
         endGame();
         addXP(score);
         if (score >= 1500) {
@@ -105,6 +214,18 @@ export default function NameThatPornstar() {
 
     return (
         <div className="max-w-4xl mx-auto p-4 w-full">
+            {/* Leaderboard Overlay */}
+            <AnimatePresence>
+                {showLeaderboard && (
+                    <Leaderboard
+                        score={score}
+                        currentRound={currentRound}
+                        countdown={countdown}
+                        isGameOver={gameOver}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Header Stats */}
             <div className="flex justify-between items-center mb-8 bg-zinc-900/80 p-4 rounded-xl border border-zinc-800">
                 <div className="text-xl font-bold text-white">
@@ -125,7 +246,6 @@ export default function NameThatPornstar() {
                 <h1 className="text-5xl font-black text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
                     {targetPerformer.name}
                 </h1>
-                {/* Answer Reveal Hint */}
                 {roundOver && !isCorrect && (
                     <div className="mt-4 text-red-500 font-bold animate-pulse">
                         Time's up! Look for the green match!
@@ -162,7 +282,6 @@ export default function NameThatPornstar() {
                                 className="object-cover"
                             />
 
-                            {/* Result Overlay */}
                             {roundOver && isTarget && (
                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500/40 backdrop-blur-sm">
                                     <FaHeart className="text-6xl text-white drop-shadow-lg animate-bounce mb-2" />
