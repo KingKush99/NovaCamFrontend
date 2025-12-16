@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FaArrowLeft, FaHeart, FaExternalLinkAlt, FaUser, FaPlay, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaHeart, FaExternalLinkAlt, FaUser, FaPlay } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
 // Affiliate codes
@@ -39,10 +39,14 @@ export default function ChaturbateRoomPage() {
     const router = useRouter();
     const username = params.username as string;
     const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [redirecting, setRedirecting] = useState(false);
+    const [embedError, setEmbedError] = useState(false);
 
-    // Chaturbate URL with affiliate tracking
-    const chaturbateUrl = `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=room&room=${username}`;
+    // Try different Chaturbate embed formats
+    // Format 1: Official affiliate embed with campaign tracking
+    const embedUrl = `https://chaturbate.com/fullvideo/?b=${username}&campaign=${CAMPAIGN}&embed_video_only=1&bgcolor=black&mobileRedirect=never`;
+
+    // Fallback: Direct room URL (for external link)
+    const externalUrl = `https://chaturbate.com/in/?tour=${TOUR}&campaign=${CAMPAIGN}&track=room&room=${username}`;
 
     // Fetch suggestions from API
     useEffect(() => {
@@ -65,11 +69,6 @@ export default function ChaturbateRoomPage() {
         fetchSuggestions();
     }, [username]);
 
-    const handleWatchNow = () => {
-        setRedirecting(true);
-        window.location.href = chaturbateUrl;
-    };
-
     return (
         <div className="min-h-screen bg-black">
             {/* Header Bar */}
@@ -87,50 +86,53 @@ export default function ChaturbateRoomPage() {
                                 <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                 {username}
                             </h1>
-                            <p className="text-zinc-500 text-xs">Live on Chaturbate</p>
+                            <p className="text-zinc-500 text-xs">Live Stream</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <button className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-colors">
                             <FaHeart /> Follow
                         </button>
+                        <a
+                            href={externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-colors"
+                        >
+                            <FaExternalLinkAlt /> Open Full
+                        </a>
                     </div>
                 </div>
             </div>
 
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 py-6">
-                {/* Watch Now Card */}
-                <div className="w-full aspect-video bg-gradient-to-br from-fuchsia-900/50 via-purple-900/50 to-pink-900/50 rounded-xl overflow-hidden border border-fuchsia-500/30 mb-8 flex flex-col items-center justify-center text-center p-8">
-                    <div className="mb-6">
-                        <div className="w-24 h-24 bg-fuchsia-600/30 rounded-full flex items-center justify-center mb-4 mx-auto border-2 border-fuchsia-500/50">
-                            <FaPlay className="text-4xl text-fuchsia-400 ml-2" />
+                {/* Embedded Player - Using Chaturbate's fullvideo embed */}
+                <div className="w-full aspect-video bg-black rounded-xl overflow-hidden border border-zinc-800 mb-8 relative">
+                    {!embedError ? (
+                        <iframe
+                            src={embedUrl}
+                            className="w-full h-full"
+                            style={{ border: 'none' }}
+                            allowFullScreen
+                            allow="autoplay; encrypted-media; fullscreen"
+                            onError={() => setEmbedError(true)}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-fuchsia-900/50 to-purple-900/50 text-center p-8">
+                            <FaPlay className="text-5xl text-fuchsia-500 mb-4" />
+                            <h3 className="text-xl font-bold text-white mb-2">Stream Unavailable</h3>
+                            <p className="text-zinc-400 mb-4">This stream may be offline or restricted</p>
+                            <a
+                                href={externalUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-colors"
+                            >
+                                <FaExternalLinkAlt /> Watch on Chaturbate
+                            </a>
                         </div>
-                        <h2 className="text-3xl font-black text-white mb-2">{username}</h2>
-                        <p className="text-zinc-400">is currently streaming live!</p>
-                    </div>
-
-                    <button
-                        onClick={handleWatchNow}
-                        disabled={redirecting}
-                        className="bg-fuchsia-600 hover:bg-fuchsia-500 disabled:bg-fuchsia-800 text-white px-8 py-4 rounded-xl text-lg font-bold flex items-center gap-3 transition-all hover:scale-105 disabled:scale-100"
-                    >
-                        {redirecting ? (
-                            <>
-                                <FaSpinner className="animate-spin" />
-                                Redirecting to Chaturbate...
-                            </>
-                        ) : (
-                            <>
-                                <FaExternalLinkAlt />
-                                Watch Now on Chaturbate
-                            </>
-                        )}
-                    </button>
-
-                    <p className="text-zinc-500 text-sm mt-4">
-                        Opens in this window • Free to watch
-                    </p>
+                    )}
                 </div>
 
                 {/* Suggestions Section */}

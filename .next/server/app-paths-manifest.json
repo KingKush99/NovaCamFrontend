@@ -1,7 +1,5 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
   "/api/performers/route": "app/api/performers/route.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/cams/page": "app/cams/page.js",
-  "/cams/room/[username]/page": "app/cams/room/[username]/page.js"
+  "/cams/room/[username]/page": "app/cams/room/[username]/page.js",
+  "/cams/page": "app/cams/page.js"
 }

@@ -1804,6 +1804,9 @@ video {
 .to-pink-900\/50 {
   --tw-gradient-to: rgb(131 24 67 / 0.5) var(--tw-gradient-to-position);
 }
+.to-purple-900\/50 {
+  --tw-gradient-to: rgb(88 28 135 / 0.5) var(--tw-gradient-to-position);
+}
 .bg-clip-text {
   -webkit-background-clip: text;
           background-clip: text;
